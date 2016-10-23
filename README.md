@@ -1,30 +1,26 @@
-Introduction.
+# VARIANTS
+## variant.set([ html ], [ css ], [ js ], [ options ])
+- The main function for creating and passing content to the page is `variant.set`
+- Function `variant.set` can apply **4 optional parameters** in any order
+- Running function without arguments will be generate variant with default content
 
-The main function for creating and running variant of test is variant.run
-This function can apply 4 parameters:
-test.variant([html], [css], [js], [options])
-Each parameter of function is optional and no required the order. 
-* Running function without arguments will be generated variant of test as default.
+## Parameters:
 
-Parameters:
+### *[ html ]*
+- `html` parameter provides easiest way for creating and passing template to the page.
+- Invoke function only with `html` parameter will be append template into body. 
 
-*** html ***
-Parameter html provides easiest way for creating template.
-* Calling function only with this parameter will be append template into body. 
- 
-Example:
+*Example of appending template into tag body:*
 ```javascript
-variant.run(
-    '<h1> Test is run. <h1>'
-);
+variant.set('<h1> Test is run. <h1>');
 ```
 
-*** css ***
-Parameter css add style to the test page.
+### *[ css ]*
+- `css` parameter is style. Style apply to the page after variants generation
 
-Example:
+*Example of adding new style to the page:*
 ```javascript
-variant.run(
+variant.set(
     `body {
         background: rgb(99, 99, 206);
         color: white;
@@ -32,10 +28,11 @@ variant.run(
 );
 ```
 
-Example with template:
+*Example of adding style and template to the page:*
 ```javascript
-variant.run(
+variant.set(
     '<h1> Test is run. <h1>',
+    
     `h1 {
         background: palegreen;
         color: green;
@@ -47,93 +44,128 @@ variant.run(
 );
 ```
 
-*** js ***
-Parameter js provides the function for execution javascript.
-It should be a function which will be executed when test is uploaded.
-* Context of this function contains other parameters which available into context as a functions.
+### *[ js ]*
+- `js` parameter is a function. Code of `js` function would be execute after variants generation
 
-Example:
+*Example of running js when variant was generated:*
 ```javascript
-test.variant(
+variant.set(
     function () {
-        alert('run test');
+        alert('variant is generated');
     }
 );
 ```
 
-Context of template is available by calling this.html function:
+- Context of `js` function contains content of `css` and `html` parameters as a **functions** 
+which available by same names `this.css()` and `this.html()`
 
-Example with passing template into specific place:
+*Example of passing template into tag header:*
 ```javascript
-variant.run(
-    '<h1> Test is run. <h1>',
+variant.set(
+    '<h1> Run test. <h1>',
+    
     function () {
-        document.getElementById('header').innerHTML(this.html());
+        document.getElementById('header').appendChild(this.html());
     }
 );
 ```
- 
-Defined data for template is easy by creating a new property into context of execution function. 
-Data into template will be available as a name of property into curly brackets. 
-* For using brackets as text it should be encoded by slash /{ /}
-* Do not use next names into properties: html, css, options they will be ignored
 
-Example:
+- Dynamic data into template which defined as **property** into context of `js` parameter 
+is available by the same **name into curly brackets**. 
+- For using brackets as a simple text it should be encoded by slash for the left `/{` and for the right `/}`
+- Reserves names of property: `html`, `css`
+
+*Example of passing data into template:*
 ```javascript
-variant.run(
-    '<h1> Test is run. {text} <h1>',
+variant.set(
+    '<h1> Run test. {text} <h1>',
+    
     function () {
-        this.text = "Is amazing!!!"
-        document.getElementById('header').innerHTML(this.html());
+        this.text = 'It's easy!!!'
+        
+        document.getElementById('header').innerHTML(this.html())
     }
 );
 ```
 
-*** options ***
-Parameter options provides cleaner way for split data from execution function.
-Instead of defined data into execution function put it into options object.
+- Data for template can be one of the next type: **string** or **array** 
+- In case of data is **array** and it is **not empty** wrapper tag will be duplicates for each element
+- In case of data is **array** and it is **empty** wrapper tag will be removed
 
-Example:
+*Example of passing different type of data into template:*
 ```javascript
-variant.run(
-    '<h1> Test is run. {text} <h1>',
-    {
-        text: "Is amazing!!!"
-    }
-);
-```
-
-Data for template can be also an array which will be duplicate a wrapper element
- 
-Example:
-```javascript
-variant.run(
-    `<div>
-        <h1> Test is run. {text} <h1>
-        <ul>
-            <li>{items}</li>
-        </ul>
-     </div>`,
-    {
-        text: "Is amazing!!!",
-        items: ['']
-    }
-);
-```
-
-Example with all parameters:
-```javascript
-variant.run(
-    '<h1> Test is run. {text} <h1>',
-    'h1 {
-        background: palegreen;
-        color: green;
-    }',
+variant.set(
+    `<section>
+        <h1> Run test. {text} <h1>
+        <ol>
+            <li> {parameters} </li>
+        </ol>
+    </section>`,
+    
     function () {
-            document.getElementById('header').innerHTML(this.html());
+        this.text = `It's easy!!!`
+        this.parameters = ['html', 'css', 'js', 'options']
+        
+        document.getElementById('header').innerHTML(this.html())
+    }
+);
+```
+### *[ options ]*
+- `options` parameter is object which provides cleaner way for splitting data from execution function
+
+*Example of putting data into options:*
+```javascript
+variant.set(
+    `<section>
+        <h1> Run test. {text} <h1>
+        <ol>
+            <li> {parameters} </li>
+        </ol>
+    </section>`,
+    
+    function () {
+        document.getElementById('header').innerHTML(this.html())
     },
+    
     {
-        text: "Is amazing!!!"
+        text: `It's amazing!!!`,
+        parameters: ['html', 'css', 'js', 'options']
     }
 );
 ```
+
+## variant.conf( settings )
+- For keeping control on generation process invoke function `variant.conf` with specific settings
+
+## settings:
+- `settings` is a object with specific keys which help to keep control on generation process
+
+### *settings.checker { Function }*
+- Key `checker` is a function
+- Function `checker` will executed in interval
+- When function `checker` returns **true** variant starts generation
+- By default `checker` returns **true** on **DOMContentLoaded** event
+
+### *settings.interval { Number }*
+- Key `interval` is a time of duration when `checker` function is invoke
+- Values of `interval` sets in *ms*
+- Default value of `interval` *100*
+
+### *settings.stop { Function }*
+- Key `stop` is a function
+- When `stop` function returns **true** `checker` will be stopped.
+
+### *settings.stopInterval { Number }*
+- Key `stopInterval` is a time after DOMContentLoaded when `checker` will be stopped.
+- Values of `stopInterval` sets in *ms*
+
+### *settings.order { Number }*
+- Key `order` sets an order of execution variant for multi variant case  
+- Default values of `order` is *0*
+
+### *settings.hide { String }*
+- Key `settings` is selector which hide during `checker` process
+
+### *settings.hideStyle { String }*
+- Key `hideStyle` is a rule for hidden element
+- Default values of `hideStyle` is `position: absolute; top: -10000px; left: -10000px;`
