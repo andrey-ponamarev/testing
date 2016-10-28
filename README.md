@@ -1,4 +1,5 @@
 # VARIANTS
+
 ## variant.set([ html ], [ css ], [ js ], [ options ])
 - The main function for creating and passing content to the page is `variant.set`
 - Function `variant.set` can apply **4 optional parameters** in any order
